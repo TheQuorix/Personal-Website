@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -33,7 +34,11 @@ type Config struct {
 
 // Получение данных конфига
 func Load() Config {
-	godotenv.Load()
+	err := godotenv.Load()
+
+	if err != nil {
+		log.Printf("get config: %v", err)
+	}
 
 	chatID, err := strconv.ParseInt(os.Getenv("TELEGRAM_CHAT_ID"), 10, 64)
 	if err != nil {

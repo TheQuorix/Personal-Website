@@ -33,7 +33,7 @@ func Run() {
 
 	weather, err := openweatherClient.Fetch(ctx)
 	if err != nil {
-		panic(fmt.Errorf("get weather: %w", err))
+		log.Printf("get weather: %v", err)
 	}
 
 	fmt.Printf("Temp: %v\nFeels like: %v\n\n", weather.Temp, weather.FeelsLike)
@@ -43,7 +43,7 @@ func Run() {
 
 	track, err := lastfmClient.Fetch(ctx)
 	if err != nil {
-		panic(fmt.Errorf("get track: %w", err))
+		log.Printf("get track: %v", err)
 	}
 
 	fmt.Printf("Artist: %v\nName: %v\nImageURL: %v\nSongURL: %v\nNowPlaying: %v\nDate: %v\n\n", track.Artist, track.Name, track.ImageURL, track.SongURL, track.NowPlaying, track.Date)

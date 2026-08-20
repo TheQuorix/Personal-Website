@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 
@@ -35,7 +36,12 @@ func (c Client) Fetch(ctx context.Context) (Track, error) {
 	if err != nil {
 		return Track{}, fmt.Errorf("request failed: %w", err)
 	}
-	defer response.Body.Close()
+	defer func() {
+		err := response.Body.Close()
+		if err != nil {
+			log.Printf("close response body: %v", err)
+		}
+	}()
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
