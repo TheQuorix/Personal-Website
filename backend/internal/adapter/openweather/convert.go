@@ -1,8 +1,8 @@
 package openweather
 
-func convert(rawWeather rawWeatherResponse) Weather {
+func convert(raw rawWeatherResponse) Weather {
 	return Weather{
-		Temp:      rawWeather.Main.Temp,
-		FeelsLike: rawWeather.Main.FeelsLike,
+		Temp:      raw.Main.Temp,
+		FeelsLike: raw.Main.FeelsLike,
 	}
 }

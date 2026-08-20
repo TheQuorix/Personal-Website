@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/TheQuorix/Personal-Website/internal/adapter/lastfm"
 	"github.com/TheQuorix/Personal-Website/internal/adapter/openweather"
 	"github.com/TheQuorix/Personal-Website/internal/config"
 	httpDelivery "github.com/TheQuorix/Personal-Website/internal/delivery/http"
@@ -35,7 +36,17 @@ func Run() {
 		panic(fmt.Errorf("get weather: %w", err))
 	}
 
-	fmt.Printf("Temp: %v\nFeels like: %v\n", weather.Temp, weather.FeelsLike)
+	fmt.Printf("Temp: %v\nFeels like: %v\n\n", weather.Temp, weather.FeelsLike)
+
+	// Подключение и тест lastFm клиента
+	lastfmClient := lastfm.NewClient(httpClient, cfg)
+
+	track, err := lastfmClient.Fetch(ctx)
+	if err != nil {
+		panic(fmt.Errorf("get track: %w", err))
+	}
+
+	fmt.Printf("Artist: %v\nName: %v\nImageURL: %v\nSongURL: %v\nNowPlaying: %v\nDate: %v\n\n", track.Artist, track.Name, track.ImageURL, track.SongURL, track.NowPlaying, track.Date)
 
 	// Создание http сервера
 	httpRouter := httpDelivery.NewRouter()
