@@ -16,8 +16,7 @@ import (
 func Run() {
 	cfg := config.Load()
 
-	_ = cfg
-
+	// Создание http сервера
 	httpRouter := httpDelivery.NewRouter()
 	httpServer := httpDelivery.NewServer(cfg.Port, httpRouter)
 
@@ -28,6 +27,7 @@ func Run() {
 		}
 	}()
 
+	// Не позволяет выключаться программе без сигнала выключения
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
