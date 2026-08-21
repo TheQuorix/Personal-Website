@@ -35,7 +35,8 @@
             </div>
 
             <div flex gap-20px>
-                
+                <PageInfoPanel/>
+                <NamedPanel :x="3" :y="1" :title="'Placeholder'"></NamedPanel>
             </div>
 
             <div flex gap-20px>
