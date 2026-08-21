@@ -19,49 +19,28 @@ import (
 	"github.com/TheQuorix/Personal-Website/internal/domain/info"
 )
 
+var Config config.Config
+var Context context.Context
+
+var HttpClient *http.Client
+var OpenWeatherClient *openweather.Client
+var LastFmClient *lastfm.Client
+var GithubClient *github.Client
+var SteamClient *steam.Client
+
+var InfoPoller *info.Poller
+
 // Запуск основного кода
 func Run() {
-	cfg := config.Load()
+	Config = config.Load()
 
-	ctx, cancel := context.WithCancel(context.Background())
+	var cancel context.CancelFunc
+	Context, cancel = context.WithCancel(context.Background())
 	defer cancel()
 
-	// Создание http клиента
-	httpClient := &http.Client{
-		Timeout: 10 * time.Second,
-	}
-
-	// Подключение и тест OpenWeather клиента
-	openweatherClient := openweather.NewClient(httpClient, cfg)
-
-	// Подключение и тест LastFm клиента
-	lastfmClient := lastfm.NewClient(httpClient, cfg)
-
-	// Подключение и тест Github
-	githubClient := github.NewClient(httpClient, cfg)
-
-	// Подключение Steam
-	imageCache, err := steam.NewImageCache("./data/steam-icons", "/media/steam-icons", httpClient)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	steamClient := steam.NewClient(httpClient, cfg, imageCache)
-
-	// Подключение и старт опроса информации
-	infoPoller := info.NewPoller(*openweatherClient, *lastfmClient, *steamClient, *githubClient)
-	infoPoller.StartPolling(ctx)
-
-	// Создание http сервера
-	httpRouter := httpDelivery.NewRouter(infoPoller)
-	httpServer := httpDelivery.NewServer(cfg.Port, httpRouter)
-
-	go func() {
-		log.Printf("HTTP-server started at %s", cfg.Port)
-		if err := httpServer.Start(); err != nil && err != http.ErrServerClosed {
-			panic(fmt.Errorf("start HTTP-server: %w", err))
-		}
-	}()
+	initAdapters()
+	initDomain()
+	initDelivery()
 
 	// Не позволяет выключаться программе без сигнала выключения
 	stop := make(chan os.Signal, 1)
@@ -69,4 +48,46 @@ func Run() {
 	<-stop
 
 	log.Println("Exiting...")
+}
+
+func initAdapters() {
+	// Создание http клиента
+	HttpClient = &http.Client{
+		Timeout: 10 * time.Second,
+	}
+
+	// Подключение и тест OpenWeather клиента
+	OpenWeatherClient = openweather.NewClient(HttpClient, Config)
+
+	// Подключение и тест LastFm клиента
+	LastFmClient = lastfm.NewClient(HttpClient, Config)
+
+	// Подключение и тест Github
+	GithubClient = github.NewClient(HttpClient, Config)
+
+	// Подключение Steam
+	imageCache, err := steam.NewImageCache("./data/steam-icons", "/media/steam-icons", HttpClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	SteamClient = steam.NewClient(HttpClient, Config, imageCache)
+}
+
+func initDomain() {
+	// Подключение и старт опроса информации
+	InfoPoller = info.NewPoller(*OpenWeatherClient, *LastFmClient, *SteamClient, *GithubClient)
+	InfoPoller.StartPolling(Context)
+}
+
+func initDelivery() {
+	httpRouter := httpDelivery.NewRouter(InfoPoller)
+	httpServer := httpDelivery.NewServer(Config.Port, httpRouter)
+
+	go func() {
+		log.Printf("HTTP-server started at %s", Config.Port)
+		if err := httpServer.Start(); err != nil && err != http.ErrServerClosed {
+			panic(fmt.Errorf("start HTTP-server: %w", err))
+		}
+	}()
 }
