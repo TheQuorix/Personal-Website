@@ -27,10 +27,10 @@ type rawTrack struct {
 }
 
 type TrackData struct {
-	Artist     string
-	Name       string
-	ImageURL   string
-	SongURL    string
-	NowPlaying bool
-	Date       time.Time
+	Artist     string    `json:"artist"`
+	Name       string    `json:"name"`
+	ImageURL   string    `json:"image_url"`
+	SongURL    string    `json:"song_url"`
+	NowPlaying bool      `json:"now_playing"`
+	Date       time.Time `json:"date"`
 }

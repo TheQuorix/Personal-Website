@@ -16,6 +16,7 @@ import (
 	"github.com/TheQuorix/Personal-Website/internal/adapter/steam"
 	"github.com/TheQuorix/Personal-Website/internal/config"
 	httpDelivery "github.com/TheQuorix/Personal-Website/internal/delivery/http"
+	"github.com/TheQuorix/Personal-Website/internal/domain/info"
 )
 
 // Запуск основного кода
@@ -33,35 +34,13 @@ func Run() {
 	// Подключение и тест OpenWeather клиента
 	openweatherClient := openweather.NewClient(httpClient, cfg)
 
-	weather, err := openweatherClient.Fetch(ctx)
-	if err != nil {
-		log.Printf("get weather: %v", err)
-	}
-
-	fmt.Printf("Temp: %v\nFeels like: %v\n\n", weather.Temp, weather.FeelsLike)
-
-	// Подключение и тест lastFm клиента
+	// Подключение и тест LastFm клиента
 	lastfmClient := lastfm.NewClient(httpClient, cfg)
 
-	track, err := lastfmClient.Fetch(ctx)
-	if err != nil {
-		log.Printf("get track: %v", err)
-	}
-
-	fmt.Printf("Artist: %v\nName: %v\nImageURL: %v\nSongURL: %v\nNowPlaying: %v\nDate: %v\n\n", track.Artist, track.Name, track.ImageURL, track.SongURL, track.NowPlaying, track.Date)
-
-	// Подключение и тест github
+	// Подключение и тест Github
 	githubClient := github.NewClient(httpClient, cfg)
 
-	github, err := githubClient.Fetch(ctx)
-	if err != nil {
-		log.Printf("get github: %v", err)
-	}
-
-	fmt.Printf("%v\n\n", github)
-
-	// Подключение steam
-
+	// Подключение Steam
 	imageCache, err := steam.NewImageCache("./data/steam-icons", "/media/steam-icons", httpClient)
 	if err != nil {
 		log.Fatal(err)
@@ -69,15 +48,12 @@ func Run() {
 
 	steamClient := steam.NewClient(httpClient, cfg, imageCache)
 
-	steam, err := steamClient.Fetch(ctx)
-	if err != nil {
-		log.Printf("get steam: %v", err)
-	}
-
-	fmt.Printf("%v\n\n", steam)
+	// Подключение и старт опроса информации
+	infoPoller := info.NewPoller(*openweatherClient, *lastfmClient, *steamClient, *githubClient)
+	infoPoller.StartPolling(ctx)
 
 	// Создание http сервера
-	httpRouter := httpDelivery.NewRouter()
+	httpRouter := httpDelivery.NewRouter(infoPoller)
 	httpServer := httpDelivery.NewServer(cfg.Port, httpRouter)
 
 	go func() {

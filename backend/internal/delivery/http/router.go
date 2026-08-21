@@ -3,10 +3,12 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+
+	"github.com/TheQuorix/Personal-Website/internal/domain/info"
 )
 
 // Создание роутеров
-func NewRouter() http.Handler {
+func NewRouter(infoPoller *info.Poller) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("/media/steam-icons/", http.StripPrefix("/media/steam-icons/", http.FileServer(http.Dir("./data/steam-icons"))))
@@ -15,6 +17,10 @@ func NewRouter() http.Handler {
 		writeJSON(w, http.StatusOK, MessageResponse{
 			Message: "Hello",
 		})
+	})
+
+	mux.HandleFunc("GET /api/v1/info", func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, http.StatusOK, infoPoller.GetCached())
 	})
 
 	return mux

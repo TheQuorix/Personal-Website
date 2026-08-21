@@ -8,6 +8,6 @@ type rawWeatherResponse struct {
 }
 
 type WeatherData struct {
-	Temp      float64
-	FeelsLike float64
+	Temp      float64 `json:"temp"`
+	FeelsLike float64 `json:"feels_like"`
 }
