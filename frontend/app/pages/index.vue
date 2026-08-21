@@ -1,5 +1,7 @@
 <script setup lang="ts">
   const { data: info, pending, error} = await useInfo()
+
+  const currentTab = ref<'projects' | 'tools' | 'comments'>('comments')
 </script>
 
 <template>
@@ -40,15 +42,7 @@
             </div>
 
             <div flex gap-20px>
-                
-            </div>
-
-            <div flex gap-20px>
-                
-            </div>
-
-            <div flex gap-20px>
-                
+                <ControllerPanel v-model="currentTab" />
             </div>
         </div>
     </div>
