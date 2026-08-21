@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/TheQuorix/Personal-Website/internal/domain/commentrequest"
 )
@@ -47,6 +48,7 @@ func (h *CommentRequestHandler) HandleCreate(w http.ResponseWriter, r *http.Requ
 		Author:  req.Author,
 		Message: req.Message,
 		Publish: req.Publish,
+		Date:    time.Now(),
 	}
 
 	// 4. Вызов бизнес-логики (Domain Service)

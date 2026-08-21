@@ -78,9 +78,7 @@ async function postComment() {
 
         <Comment 
           v-for="(comment, index) in comments?.toReversed()" 
-          :author="comment.author" 
-          :message="comment.message" 
-          :response="comment.response"
+          :comment="comment"
         />
       </div>
     </div>
