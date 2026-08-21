@@ -1,6 +1,10 @@
 package http
 
-import "time"
+import (
+	"time"
+
+	"github.com/TheQuorix/Personal-Website/internal/domain/comment"
+)
 
 type MessageResponse struct {
 	Message string `json:"message"`
@@ -21,4 +25,17 @@ type CommentResponse struct {
 	Message  string    `json:"message"`
 	Response string    `json:"response"`
 	Date     time.Time `json:"date"`
+}
+
+func ToCommentResponseList(comments []comment.Comment) []CommentResponse {
+	responses := make([]CommentResponse, 0, len(comments))
+	for _, c := range comments {
+		responses = append(responses, CommentResponse{
+			Author:   c.Author,
+			Message:  c.Message,
+			Response: c.Response,
+			Date:     c.Date,
+		})
+	}
+	return responses
 }

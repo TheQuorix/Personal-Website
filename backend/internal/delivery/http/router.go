@@ -8,7 +8,7 @@ import (
 )
 
 // Создание роутеров
-func NewRouter(infoPoller *info.Poller) http.Handler {
+func NewRouter(infoPoller *info.Poller, commentHandler *CommentHandler, commentRequestHandler *CommentRequestHandler) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("/media/steam-icons/", http.StripPrefix("/media/steam-icons/", http.FileServer(http.Dir("./data/steam-icons"))))
@@ -22,6 +22,9 @@ func NewRouter(infoPoller *info.Poller) http.Handler {
 	mux.HandleFunc("GET /api/v1/info", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusOK, infoPoller.GetCached())
 	})
+
+	mux.HandleFunc("POST /api/v1/comments", commentRequestHandler.HandleCreate)
+	mux.HandleFunc("GET /api/v1/comments", commentHandler.HandleGet)
 
 	return mux
 }

@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"fmt"
+	"database/sql"
 	"log"
 	"net/http"
 	"os"
@@ -13,81 +13,147 @@ import (
 	"github.com/TheQuorix/Personal-Website/internal/adapter/github"
 	"github.com/TheQuorix/Personal-Website/internal/adapter/lastfm"
 	"github.com/TheQuorix/Personal-Website/internal/adapter/openweather"
+	"github.com/TheQuorix/Personal-Website/internal/adapter/sqlite"
 	"github.com/TheQuorix/Personal-Website/internal/adapter/steam"
+	"github.com/TheQuorix/Personal-Website/internal/adapter/telegram"
 	"github.com/TheQuorix/Personal-Website/internal/config"
-	httpDelivery "github.com/TheQuorix/Personal-Website/internal/delivery/http"
+	"github.com/TheQuorix/Personal-Website/internal/domain/comment"
+	"github.com/TheQuorix/Personal-Website/internal/domain/commentrequest"
 	"github.com/TheQuorix/Personal-Website/internal/domain/info"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+
+	httpDelivery "github.com/TheQuorix/Personal-Website/internal/delivery/http"
+	tgDelivery "github.com/TheQuorix/Personal-Website/internal/delivery/telegram"
+
+	_ "modernc.org/sqlite"
 )
 
-var Config config.Config
-var Context context.Context
+var (
+	Database *sql.DB
+	BotAPI   *tgbotapi.BotAPI
+	Config   config.Config
+	Context  context.Context
+	Cancel   context.CancelFunc
 
-var HttpClient *http.Client
-var OpenWeatherClient *openweather.Client
-var LastFmClient *lastfm.Client
-var GithubClient *github.Client
-var SteamClient *steam.Client
+	HttpClient        *http.Client
+	OpenWeatherClient *openweather.Client
+	LastFmClient      *lastfm.Client
+	GithubClient      *github.Client
+	SteamClient       *steam.Client
 
-var InfoPoller *info.Poller
+	CommentService        *comment.Service
+	CommentRequestService *commentrequest.Service
 
-// Запуск основного кода
+	InfoPoller *info.Poller
+
+	TgBot      *tgDelivery.Bot
+	HttpServer *httpDelivery.Server
+)
+
+// Run — запуск основного кода
 func Run() {
 	Config = config.Load()
 
-	var cancel context.CancelFunc
-	Context, cancel = context.WithCancel(context.Background())
-	defer cancel()
+	Context, Cancel = context.WithCancel(context.Background())
+	defer Cancel()
 
 	initAdapters()
 	initDomain()
 	initDelivery()
+
+	go func() {
+		log.Println("Telegram bot started")
+		TgBot.Start()
+	}()
+
+	go func() {
+		log.Printf("HTTP-server started at %s", Config.Port)
+		if err := HttpServer.Start(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("start HTTP-server: %v", err)
+		}
+	}()
 
 	// Не позволяет выключаться программе без сигнала выключения
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 	<-stop
 
-	log.Println("Exiting...")
+	shutdown()
 }
 
 func initAdapters() {
-	// Создание http клиента
+	var err error
+
+	Database, err = sqlite.Init(Config.DatabasePath)
+	if err != nil {
+		log.Fatalf("init database: %v", err)
+	}
+
+	BotAPI, err = tgbotapi.NewBotAPI(Config.TelegramBotToken)
+	if err != nil {
+		log.Fatalf("init telegram bot: %v", err)
+	}
+
 	HttpClient = &http.Client{
 		Timeout: 10 * time.Second,
 	}
 
-	// Подключение и тест OpenWeather клиента
 	OpenWeatherClient = openweather.NewClient(HttpClient, Config)
-
-	// Подключение и тест LastFm клиента
 	LastFmClient = lastfm.NewClient(HttpClient, Config)
-
-	// Подключение и тест Github
 	GithubClient = github.NewClient(HttpClient, Config)
 
-	// Подключение Steam
 	imageCache, err := steam.NewImageCache("./data/steam-icons", "/media/steam-icons", HttpClient)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("init steam image cache: %v", err)
 	}
-
 	SteamClient = steam.NewClient(HttpClient, Config, imageCache)
 }
 
 func initDomain() {
-	// Подключение и старт опроса информации
-	InfoPoller = info.NewPoller(*OpenWeatherClient, *LastFmClient, *SteamClient, *GithubClient)
+	commentRepo := sqlite.NewCommentRepo(Database)
+	commentRequestRepo := sqlite.NewCommentRequestRepo(Database)
+	notifier := telegram.NewNotifier(BotAPI, Config.TelegramChatID)
+
+	CommentService = comment.NewService(commentRepo)
+	CommentRequestService = commentrequest.NewService(commentRequestRepo, notifier, commentRepo)
+
+	InfoPoller = info.NewPoller(OpenWeatherClient, LastFmClient, SteamClient, GithubClient)
 	InfoPoller.StartPolling(Context)
 }
 
 func initDelivery() {
-	httpRouter := httpDelivery.NewRouter(InfoPoller)
-	httpServer := httpDelivery.NewServer(Config.Port, httpRouter)
+	// Telegram-деливери
+	fsmHandler := tgDelivery.NewFsmHandler(Context, CommentRequestService)
+	msgHandler := tgDelivery.NewMessageHandler(CommentService, fsmHandler)
+	callbackHandler := tgDelivery.NewCallbackHandler(Context, CommentRequestService, fsmHandler)
+	tgRouter := tgDelivery.NewRouter(msgHandler, callbackHandler)
+	TgBot = tgDelivery.NewBot(BotAPI, tgRouter)
 
-	go func() {
-		log.Printf("HTTP-server started at %s", Config.Port)
-		if err := httpServer.Start(); err != nil && err != http.ErrServerClosed {
-			panic(fmt.Errorf("start HTTP-server: %w", err))
-		}
-	}()
+	// HTTP-деливери
+	commentHandler := httpDelivery.NewCommentHandler(Context, CommentService)
+	commentRequestHandler := httpDelivery.NewCommentRequestHandler(CommentRequestService)
+
+	httpRouter := httpDelivery.NewRouter(InfoPoller, commentHandler, commentRequestHandler)
+	HttpServer = httpDelivery.NewServer(Config.Port, httpRouter)
+}
+
+func shutdown() {
+	log.Println("Shutting down...")
+
+	Cancel()
+
+	ctx, timeoutCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer timeoutCancel()
+
+	if err := HttpServer.Shutdown(ctx); err != nil {
+		log.Printf("HTTP server shutdown error: %v", err)
+	}
+
+	BotAPI.StopReceivingUpdates()
+
+	if err := Database.Close(); err != nil {
+		log.Printf("database close error: %v", err)
+	}
+
+	log.Println("Exited")
 }

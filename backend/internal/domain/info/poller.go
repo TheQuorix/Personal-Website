@@ -12,13 +12,13 @@ import (
 )
 
 type Poller struct {
-	weatherClient openweather.Client
-	musicClient   lastfm.Client
-	steamClient   steam.Client
-	githubClient  github.Client
+	weatherClient *openweather.Client
+	musicClient   *lastfm.Client
+	steamClient   *steam.Client
+	githubClient  *github.Client
 }
 
-func NewPoller(weatherClient openweather.Client, musicClient lastfm.Client, steamClient steam.Client, githubClient github.Client) *Poller {
+func NewPoller(weatherClient *openweather.Client, musicClient *lastfm.Client, steamClient *steam.Client, githubClient *github.Client) *Poller {
 	return &Poller{
 		weatherClient: weatherClient,
 		musicClient:   musicClient,
