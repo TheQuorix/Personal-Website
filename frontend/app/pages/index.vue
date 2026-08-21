@@ -18,6 +18,28 @@
                 <BioPanel/>
                 <WeatherPanel :weather="info.weather"/>
             </div>
+            <div flex gap-20px>
+                <MusicPanel :track="info.music"/>
+                <TechnologiesPanel/>
+            </div>
+            <div flex gap-20px>
+                
+            </div>
+            <div flex gap-20px>
+                
+            </div>
+            <div flex gap-20px>
+                
+            </div>
+            <div flex gap-20px>
+                
+            </div>
+            <div flex gap-20px>
+                
+            </div>
+            <div flex gap-20px>
+                
+            </div>
         </div>
     </div>
 </template>
