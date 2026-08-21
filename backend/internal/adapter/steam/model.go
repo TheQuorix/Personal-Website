@@ -9,7 +9,7 @@ type Game struct {
 	AppID           int    `json:"app_id"`
 	Name            string `json:"name"`
 	IconURL         string `json:"icon_url"`
-	Playtime2Weeks  int    `json:"play_2_weeks"`
+	Playtime2Weeks  int    `json:"playtime_2weeks"`
 	PlaytimeForever int    `json:"playtime_forever"`
 }
 

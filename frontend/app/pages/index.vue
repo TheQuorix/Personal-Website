@@ -1,0 +1,9 @@
+<template>
+    <div>
+        <div>
+            <div>
+                <AvatarPanel/>
+            </div>
+        </div>
+    </div>
+</template>

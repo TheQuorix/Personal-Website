@@ -1,4 +1,4 @@
-.PHONY: back-build back-run back-test back-fmt back-lint
+.PHONY: back-build back-run back-test back-fmt back-lint front-build front-run front-dev front-prepare
 
 back-build:
 	$(MAKE) -C backend build
@@ -14,3 +14,16 @@ back-fmt:
 
 back-lint:
 	$(MAKE) -C backend lint
+
+
+front-build:
+	$(MAKE) -C frontend build
+
+front-run:
+	$(MAKE) -C frontend run
+
+front-dev:
+	$(MAKE) -C frontend dev
+
+front-prepare:
+	$(MAKE) -C frontend prepare
