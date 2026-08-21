@@ -11,11 +11,11 @@ const height = computed(() => 240 * props.y - 20)
 <template>
     <div
         class="group"
-        rounded="30px"
+        rounded-30px
         bg="neutral-800/25"
-        backdrop-blur="3.5px"
+        backdrop-blur-3.5px
         border="~ neutral-500"
-        p="30px"
+        p-30px
         :style="{
             width: `${width}px`,
             height: `${height}px`

@@ -24,7 +24,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      apiBase: 'http://31.76.10.129:8080'
+      apiBase: 'http://localhost:8080'
     }
   },
   nitro: {
