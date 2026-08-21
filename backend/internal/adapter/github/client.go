@@ -26,7 +26,7 @@ func NewClient(httpClient *http.Client, cfg config.Config) *Client {
 	}
 }
 
-func (c Client) Fetch(ctx context.Context) (Github, error) {
+func (c Client) Fetch(ctx context.Context) (GithubData, error) {
 	var wg sync.WaitGroup
 	var total, followers, repos int
 	var weeks []Week
@@ -47,13 +47,13 @@ func (c Client) Fetch(ctx context.Context) (Github, error) {
 	wg.Wait()
 
 	if errCalendar != nil {
-		return Github{}, fmt.Errorf("contributions: %w", errCalendar)
+		return GithubData{}, fmt.Errorf("contributions: %w", errCalendar)
 	}
 	if errProfile != nil {
-		return Github{}, fmt.Errorf("profile: %w", errProfile)
+		return GithubData{}, fmt.Errorf("profile: %w", errProfile)
 	}
 
-	return Github{
+	return GithubData{
 		Followers:     followers,
 		Repos:         repos,
 		Contributions: total,

@@ -34,7 +34,7 @@ type contributionsResponse struct {
 	} `json:"errors"`
 }
 
-type Github struct {
+type GithubData struct {
 	Followers     int    `json:"followers"`
 	Repos         int    `json:"repos"`
 	Contributions int    `json:"contributions"`

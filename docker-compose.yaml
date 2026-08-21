@@ -9,6 +9,7 @@ services:
       - "8080:8080"
     volumes:
       - db-data:/var/lib/the-quorix/data
+      - steam-icons:/app/data/steam-icons
 
   frontend:
     build:
@@ -23,3 +24,4 @@ services:
 
 volumes:
   db-data:
+  steam-icons:

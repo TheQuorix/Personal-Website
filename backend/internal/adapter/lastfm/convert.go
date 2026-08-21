@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-func convert(raw rawTrack) (Track, error) {
-	track := Track{
+func convert(raw rawTrack) (TrackData, error) {
+	track := TrackData{
 		Artist:     raw.Artist.Text,
 		Name:       raw.Name,
 		NowPlaying: raw.Attr.NowPlaying == "true",
@@ -21,7 +21,7 @@ func convert(raw rawTrack) (Track, error) {
 	if raw.Date.UTS != "" {
 		uts, err := strconv.ParseInt(raw.Date.UTS, 10, 64)
 		if err != nil {
-			return Track{}, fmt.Errorf("invalid uts: %w", err)
+			return TrackData{}, fmt.Errorf("invalid uts: %w", err)
 		}
 		track.Date = time.Unix(uts, 0)
 	}

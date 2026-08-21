@@ -24,17 +24,17 @@ func NewClient(httpClient *http.Client, cfg config.Config) *Client {
 	}
 }
 
-func (c Client) Fetch(ctx context.Context) (Weather, error) {
+func (c Client) Fetch(ctx context.Context) (WeatherData, error) {
 	reqURL := c.getUrl(c.cfg.WeatherCity, c.cfg.WeatherApiKey)
 
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, reqURL, nil)
 	if err != nil {
-		return Weather{}, fmt.Errorf("build request: %w", err)
+		return WeatherData{}, fmt.Errorf("build request: %w", err)
 	}
 
 	response, err := c.httpClient.Do(request)
 	if err != nil {
-		return Weather{}, fmt.Errorf("request failed: %w", err)
+		return WeatherData{}, fmt.Errorf("request failed: %w", err)
 	}
 	defer func() {
 		err := response.Body.Close()
@@ -45,16 +45,16 @@ func (c Client) Fetch(ctx context.Context) (Weather, error) {
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return Weather{}, fmt.Errorf("read body: %w", err)
+		return WeatherData{}, fmt.Errorf("read body: %w", err)
 	}
 
 	if response.StatusCode != http.StatusOK {
-		return Weather{}, fmt.Errorf("unexpected status %d: %s", response.StatusCode, body)
+		return WeatherData{}, fmt.Errorf("unexpected status %d: %s", response.StatusCode, body)
 	}
 
 	var raw rawWeatherResponse
 	if err := json.Unmarshal(body, &raw); err != nil {
-		return Weather{}, fmt.Errorf("unmarshal: %w", err)
+		return WeatherData{}, fmt.Errorf("unmarshal: %w", err)
 	}
 
 	return convert(raw), nil

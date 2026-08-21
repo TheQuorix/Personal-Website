@@ -7,7 +7,7 @@ type rawWeatherResponse struct {
 	} `json:"main"`
 }
 
-type Weather struct {
+type WeatherData struct {
 	Temp      float64
 	FeelsLike float64
 }

@@ -26,7 +26,7 @@ type rawTrack struct {
 	} `json:"date"`
 }
 
-type Track struct {
+type TrackData struct {
 	Artist     string
 	Name       string
 	ImageURL   string

@@ -13,6 +13,7 @@ import (
 	"github.com/TheQuorix/Personal-Website/internal/adapter/github"
 	"github.com/TheQuorix/Personal-Website/internal/adapter/lastfm"
 	"github.com/TheQuorix/Personal-Website/internal/adapter/openweather"
+	"github.com/TheQuorix/Personal-Website/internal/adapter/steam"
 	"github.com/TheQuorix/Personal-Website/internal/config"
 	httpDelivery "github.com/TheQuorix/Personal-Website/internal/delivery/http"
 )
@@ -58,6 +59,22 @@ func Run() {
 	}
 
 	fmt.Printf("%v\n\n", github)
+
+	// Подключение steam
+
+	imageCache, err := steam.NewImageCache("./data/steam-icons", "/media/steam-icons", httpClient)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	steamClient := steam.NewClient(httpClient, cfg, imageCache)
+
+	steam, err := steamClient.Fetch(ctx)
+	if err != nil {
+		log.Printf("get steam: %v", err)
+	}
+
+	fmt.Printf("%v\n\n", steam)
 
 	// Создание http сервера
 	httpRouter := httpDelivery.NewRouter()
