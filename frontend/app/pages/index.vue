@@ -5,44 +5,44 @@
 </script>
 
 <template>
-    <BasePanel v-if="pending" :x="2" :y="2" style="--reveal-i: 0">
+    <BasePanel v-if="pending" :x="1" :y="1" style="--reveal-i: 0" absolute top="1/2" left="1/2" -translate-x="1/2" -translate-y="1/2" flex justify-center items-center>
         <Text>Loading...</Text>
     </BasePanel>
 
-    <BasePanel v-else-if="error" :x="2" :y="2" style="--reveal-i: 0">
-        <Text>Error! {{ error }}</Text>
+    <BasePanel v-else-if="error" :x="1" :y="1" style="--reveal-i: 0" absolute top="1/2" left="1/2" -translate-x="1/2" -translate-y="1/2" flex justify-center items-center>
+        <Text>Error!</Text>
     </BasePanel>
 
     <div v-else-if="info" overflow-y-auto cursor-default fixed inset="0">
         <div flex flex-col w-1660px gap-20px mx-auto py-30>
             <div flex gap-20px>
-                <AvatarPanel/>
-                <BioPanel/>
-                <WeatherPanel :weather="info.weather"/>
+                <AvatarPanel style="--reveal-i: 0"/>
+                <BioPanel style="--reveal-i: 1"/>
+                <WeatherPanel :weather="info.weather" style="--reveal-i: 2"/>
             </div>
 
             <div flex gap-20px>
-                <MusicPanel :track="info.music"/>
-                <TechnologiesPanel/> 
+                <MusicPanel :track="info.music" style="--reveal-i: 0"/>
+                <TechnologiesPanel style="--reveal-i: 1"/> 
             </div>
 
             <div flex gap-20px>
-                <GithubPanel :github="info.github"/>
-                <LinksPanel/>
+                <GithubPanel :github="info.github" style="--reveal-i: 0"/>
+                <LinksPanel style="--reveal-i: 1"/>
             </div>
 
             <div flex gap-20px>
-                <SystemInfoPanel/>
-                <GameActivityPanel :steam="info.steam"/>
+                <SystemInfoPanel style="--reveal-i: 0"/>
+                <GameActivityPanel :steam="info.steam" style="--reveal-i: 1"/>
             </div>
 
             <div flex gap-20px>
-                <PageInfoPanel/>
-                <NamedPanel :x="3" :y="1" :title="'Placeholder'"></NamedPanel>
+                <PageInfoPanel style="--reveal-i: 0"/>
+                <NamedPanel :x="3" :y="1" :title="'Placeholder'" style="--reveal-i: 1"></NamedPanel>
             </div>
 
             <div flex gap-20px>
-                <ControllerPanel v-model="currentTab" />
+                <ControllerPanel v-model="currentTab" style="--reveal-i: 0"/>
             </div>
         </div>
     </div>

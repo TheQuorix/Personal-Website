@@ -15,7 +15,7 @@ const emit = defineEmits<{
     @click="emit('click')"
   >
     <Text 
-      class="select-none text-neutral-500 text-36px" 
+      class="select-none" 
       :class="{ 'text-violet-400': active }"
     >
       <slot />
