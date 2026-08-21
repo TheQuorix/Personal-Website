@@ -44,6 +44,10 @@
             <div flex gap-20px>
                 <ControllerPanel v-model="currentTab" style="--reveal-i: 0"/>
             </div>
+
+            <div v-if="currentTab == 'comments'" flex gap-20px>
+                <CommentsPanel/>
+            </div>
         </div>
     </div>
 </template>

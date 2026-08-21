@@ -14,11 +14,11 @@ const emit = defineEmits<{
     :class="{ 'bg-violet-400/25': active }"
     @click="emit('click')"
   >
-    <Text 
-      class="select-none" 
-      :class="{ 'text-violet-400': active }"
+    <p 
+      class="select-none" font="[Fira_Code]" text="32px neutral-500" duration-300
+      :class="{ 'text-violet-400 font-bold': active }"
     >
       <slot />
-    </Text>
+    </p>
   </div>
 </template>

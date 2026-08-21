@@ -49,6 +49,5 @@ const trackState = computed(() => {
         </div>
       </div>
     </a>
-    
   </NamedPanel>
 </template>

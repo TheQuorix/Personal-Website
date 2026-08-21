@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/TheQuorix/Personal-Website/internal/domain/info"
+	"github.com/rs/cors"
 )
 
 // Создание роутеров
@@ -26,7 +27,14 @@ func NewRouter(infoPoller *info.Poller, commentHandler *CommentHandler, commentR
 	mux.HandleFunc("POST /api/v1/comments", commentRequestHandler.HandleCreate)
 	mux.HandleFunc("GET /api/v1/comments", commentHandler.HandleGet)
 
-	return mux
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowCredentials: true,
+	})
+
+	return c.Handler(mux)
 }
 
 // Ответ в виде JSON
