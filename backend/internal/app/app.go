@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/TheQuorix/Personal-Website/internal/adapter/github"
 	"github.com/TheQuorix/Personal-Website/internal/adapter/lastfm"
 	"github.com/TheQuorix/Personal-Website/internal/adapter/openweather"
 	"github.com/TheQuorix/Personal-Website/internal/config"
@@ -47,6 +48,16 @@ func Run() {
 	}
 
 	fmt.Printf("Artist: %v\nName: %v\nImageURL: %v\nSongURL: %v\nNowPlaying: %v\nDate: %v\n\n", track.Artist, track.Name, track.ImageURL, track.SongURL, track.NowPlaying, track.Date)
+
+	// Подключение и тест github
+	githubClient := github.NewClient(httpClient, cfg)
+
+	github, err := githubClient.Fetch(ctx)
+	if err != nil {
+		log.Printf("get github: %v", err)
+	}
+
+	fmt.Printf("%v\n\n", github)
 
 	// Создание http сервера
 	httpRouter := httpDelivery.NewRouter()
