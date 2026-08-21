@@ -20,10 +20,11 @@
             </div>
             <div flex gap-20px>
                 <MusicPanel :track="info.music"/>
-                <TechnologiesPanel/>
+                <TechnologiesPanel/> 
             </div>
             <div flex gap-20px>
-                
+                <GithubPanel :github="info.github"/>
+                <LinksPanel/>
             </div>
             <div flex gap-20px>
                 
