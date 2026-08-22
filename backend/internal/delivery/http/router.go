@@ -9,7 +9,7 @@ import (
 )
 
 // Создание роутеров
-func NewRouter(infoPoller *info.Poller, commentHandler *CommentHandler, commentRequestHandler *CommentRequestHandler) http.Handler {
+func NewRouter(infoPoller *info.Poller, commentHandler *CommentHandler, commentRequestHandler *CommentRequestHandler, visitHandler *VisitHandler) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("/media/steam-icons/", http.StripPrefix("/media/steam-icons/", http.FileServer(http.Dir("./data/steam-icons"))))
@@ -26,6 +26,9 @@ func NewRouter(infoPoller *info.Poller, commentHandler *CommentHandler, commentR
 
 	mux.HandleFunc("POST /api/v1/comments", commentRequestHandler.HandleCreate)
 	mux.HandleFunc("GET /api/v1/comments", commentHandler.HandleGet)
+
+	mux.HandleFunc("POST /api/v1/visits", visitHandler.Track)
+	mux.HandleFunc("GET /api/v1/visits/stats", visitHandler.Stats)
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000"},

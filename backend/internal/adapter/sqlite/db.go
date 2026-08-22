@@ -22,6 +22,17 @@ const schema = `
 		telegram_id INTEGER NOT NULL,
 		date DATETIME NOT NULL
 	);
+
+	CREATE TABLE IF NOT EXISTS visits (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		path TEXT NOT NULL,
+		visitor_hash TEXT NOT NULL,
+		visited_at DATE NOT NULL DEFAULT CURRENT_DATE,
+		created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+	);
+
+	CREATE INDEX IF NOT EXISTS idx_visits_date ON visits (visited_at);
+	CREATE INDEX IF NOT EXISTS idx_visits_hash ON visits (visitor_hash);
 `
 
 // Инициализация базы данных

@@ -20,6 +20,7 @@ import (
 	"github.com/TheQuorix/Personal-Website/internal/domain/comment"
 	"github.com/TheQuorix/Personal-Website/internal/domain/commentrequest"
 	"github.com/TheQuorix/Personal-Website/internal/domain/info"
+	"github.com/TheQuorix/Personal-Website/internal/domain/visit"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
 	httpDelivery "github.com/TheQuorix/Personal-Website/internal/delivery/http"
@@ -43,6 +44,7 @@ var (
 
 	CommentService        *comment.Service
 	CommentRequestService *commentrequest.Service
+	VisitService          *visit.Service
 
 	InfoPoller *info.Poller
 
@@ -119,6 +121,9 @@ func initDomain() {
 
 	InfoPoller = info.NewPoller(OpenWeatherClient, LastFmClient, SteamClient, GithubClient)
 	InfoPoller.StartPolling(Context)
+
+	visitRepo := sqlite.NewVisitRepo(Database)
+	VisitService = visit.NewService(visitRepo, Config.VisitorHashSalt)
 }
 
 func initDelivery() {
@@ -132,8 +137,9 @@ func initDelivery() {
 	// HTTP-деливери
 	commentHandler := httpDelivery.NewCommentHandler(Context, CommentService)
 	commentRequestHandler := httpDelivery.NewCommentRequestHandler(CommentRequestService)
+	visitHandler := httpDelivery.NewVisitHandler(VisitService)
 
-	httpRouter := httpDelivery.NewRouter(InfoPoller, commentHandler, commentRequestHandler)
+	httpRouter := httpDelivery.NewRouter(InfoPoller, commentHandler, commentRequestHandler, visitHandler)
 	HttpServer = httpDelivery.NewServer(Config.Port, httpRouter)
 }
 

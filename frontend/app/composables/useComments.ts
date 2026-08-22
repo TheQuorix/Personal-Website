@@ -2,9 +2,9 @@ import { useFetch } from 'nuxt/app'
 
 export function useComments() {
   const config = useRuntimeConfig()
-  
+  const baseURL = import.meta.server ? config.apiBase : config.public.apiBase
   return useFetch<Comment[]>('/api/v1/comments', {
-    baseURL: config.public.apiBase as string,
+    baseURL: baseURL as string,
     key: 'comments'
   })
 }

@@ -1,12 +1,10 @@
 services:
   backend:
-    build:
-      context: ./backend
-    image: personal-website-backend:latest
+    image: ghcr.io/thequorix/personal-website-backend:latest
     container_name: personal-website-backend
     restart: unless-stopped
     ports:
-      - "8080${PORT}"
+      - "8080:8080"
     volumes:
       - db-data:/var/lib/personal-website/data
       - steam-icons:/app/data/steam-icons
@@ -26,11 +24,8 @@ services:
        - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
        - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
 
-
   frontend:
-    build:
-      context: ./frontend
-    image: personal-website-frontend:latest
+    image: ghcr.io/thequorix/personal-website-frontend:latest
     container_name: personal-website-frontend
     restart: unless-stopped
     depends_on:

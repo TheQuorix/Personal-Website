@@ -1,5 +1,6 @@
 <script setup lang="ts">
   const { data: info, pending, error} = await useInfo()
+  useVisitTracking()
 
   const currentTab = ref<'projects' | 'tools' | 'comments'>('comments')
 </script>
@@ -10,7 +11,7 @@
     </BasePanel>
 
     <BasePanel v-else-if="error" :x="1" :y="1" style="--reveal-i: 0" absolute top="1/2" left="1/2" -translate-x="1/2" -translate-y="1/2" flex justify-center items-center>
-        <Text>Error!</Text>
+        <Text>Error!<br>{{ error }}</Text>
     </BasePanel>
 
     <div v-else-if="info" overflow-y-auto cursor-default fixed inset="0">

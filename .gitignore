@@ -1,3 +1,4 @@
 .env
+.env.prod
 main.db
 backend/data/steam-icons
